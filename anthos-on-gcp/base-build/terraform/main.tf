@@ -23,7 +23,7 @@ resource "google_gke_hub_feature" "feature" {
 }
 
 resource "google_gke_hub_feature_membership" "feature_member" {
-  # depends_on = [google_gke_hub_membership.membership] 
+  depends_on = [module.gke.name, module.enabled_google_apis.activate_apis] 
   provider   = google-beta
   location   = "global"
   feature    = "configmanagement"
@@ -47,5 +47,29 @@ resource "google_gke_hub_feature_membership" "feature_member" {
     }
   }
 
+}
+
+resource "google_gke_hub_feature" "multiclusterservicediscovery" {
+  name = "multiclusterservicediscovery"
+  location = "global"
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+   depends_on = [module.enabled_google_apis.activate_apis]
+}
+
+resource "google_gke_hub_feature" "multiclusteringress" {
+  name = "multiclusteringress"
+  location = "global"
+  #  for_each   = var.regions
+  spec {
+    multiclusteringress {
+      
+      config_membership = "projects/${var.project_id}/locations/global/memberships/membership-hub-gke-cluster-east"
+    }
+  }
+  provider = google-beta
+  depends_on = [module.enabled_google_apis.activate_apis, google_gke_hub_feature_membership.feature_member]
 }
 

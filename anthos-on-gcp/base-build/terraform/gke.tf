@@ -13,21 +13,23 @@ module "enabled_google_apis" {
   project_id                  = var.project_id
   disable_services_on_destroy = false
 
-  activate_apis = [
+   activate_apis = [
     "compute.googleapis.com",
+    "anthos.googleapis.com",
+    "multiclusteringress.googleapis.com",
     "container.googleapis.com",
-    "gkeconnect.googleapis.com",
-    "gkehub.googleapis.com",
+    "gkeconnect.googleapis.com", 
     "anthosconfigmanagement.googleapis.com",
     "cloudresourcemanager.googleapis.com",
-    "sqladmin.googleapis.com"
+    "multiclusterservicediscovery.googleapis.com",
+    "sqladmin.googleapis.com",
+    "gkehub.googleapis.com"
   ]
   depends_on = [time_sleep.wait_120_seconds]
 }
 
-
 module "gke" {
-  depends_on                        = [module.vpc.subnets_names]
+  depends_on                        = [module.vpc.subnets_names,module.enabled_google_apis.activate_apis ]
   for_each                          = var.regions
   source                            = "terraform-google-modules/kubernetes-engine/google//modules/beta-public-cluster"
   version                           = "~> 16.0"
