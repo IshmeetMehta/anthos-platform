@@ -6,6 +6,7 @@ resource "time_sleep" "wait_120_seconds" {
   create_duration = "120s"
 }
 
+
 module "enabled_google_apis" {
   source                      = "terraform-google-modules/project-factory/google//modules/project_services"
   version                     = "~> 10.0"
@@ -23,9 +24,10 @@ module "enabled_google_apis" {
     "cloudresourcemanager.googleapis.com",
     "multiclusterservicediscovery.googleapis.com",
     "sqladmin.googleapis.com",
-    "gkehub.googleapis.com"
+    "gkehub.googleapis.com",
+    "meshconfig.googleapis.com"
   ]
-  depends_on = [time_sleep.wait_120_seconds]
+  # depends_on = [time_sleep.wait_120_seconds]
 }
 
 module "gke" {

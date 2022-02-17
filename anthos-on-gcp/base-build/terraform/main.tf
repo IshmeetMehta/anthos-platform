@@ -49,15 +49,15 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 
 }
 
-resource "google_gke_hub_feature" "multiclusterservicediscovery" {
-  name = "multiclusterservicediscovery"
-  location = "global"
-  labels = {
-    foo = "bar"
-  }
-  provider = google-beta
-   depends_on = [module.enabled_google_apis.activate_apis]
-}
+# resource "google_gke_hub_feature" "multiclusterservicediscovery" {
+#   name = "multiclusterservicediscovery"
+#   location = "global"
+#   labels = {
+#     foo = "bar"
+#   }
+#   provider = google-beta
+#    depends_on = [module.enabled_google_apis.activate_apis]
+# }
 
 resource "google_gke_hub_feature" "multiclusteringress" {
   name = "multiclusteringress"
@@ -73,3 +73,49 @@ resource "google_gke_hub_feature" "multiclusteringress" {
   depends_on = [module.enabled_google_apis.activate_apis, google_gke_hub_feature_membership.feature_member]
 }
 
+
+
+# google_client_config and kubernetes provider must be explicitly specified like the following.
+
+data "google_client_config" "gke-cluster-east" {
+ 
+}
+
+# provider "kubernetes"  {
+#   alias                  = "gke-cluster-east"
+#   host                   = "https://${module.gke["us-east1"].endpoint}"
+#   token                  = data.google_client_config.gke-cluster-east.access_token
+#   cluster_ca_certificate = base64decode(module.gke["us-east1"].ca_certificate)
+# }
+
+
+# provider "kubernetes"  {
+#   alias                  = "gke-cluster-east"
+#   host                   = "https://${module.gke["us-east1"].endpoint}"
+#   token                  = data.google_client_config.gke-cluster-east.access_token
+#   cluster_ca_certificate = base64decode(module.gke["us-east1"].ca_certificate)
+# }
+
+
+module "gke_auth" {
+  source           = "terraform-google-modules/kubernetes-engine/google//modules/auth"
+
+  project_id       = module.enabled_google_apis.project_id 
+  cluster_name     = module.gke["us-east1"].name
+  location         = module.gke["us-east1"].location
+}
+
+provider "kubernetes" {
+
+  cluster_ca_certificate = module.gke_auth.cluster_ca_certificate
+  host                   = module.gke_auth.host
+  token                  = module.gke_auth.token
+}
+
+module "asm" {
+  depends_on = [module.enabled_google_apis.activate_apis] 
+  source           = "git::https://github.com/Monkeyanator/terraform-google-kubernetes-engine.git//modules/asm?ref=rewrite-asm-module"
+  cluster_name     = module.gke["us-east1"].name
+  cluster_location = module.gke["us-east1"].location
+  project_id       = module.enabled_google_apis.project_id  
+}

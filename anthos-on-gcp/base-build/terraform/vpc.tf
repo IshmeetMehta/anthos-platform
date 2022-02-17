@@ -32,6 +32,7 @@ variable "regions" {
 }
 
 module "vpc" {
+  depends_on   = [module.enabled_google_apis.activate_apis]
   source       = "terraform-google-modules/network/google"
   version      = "~> 2.5"
   project_id   = var.project_id
@@ -58,5 +59,5 @@ module "vpc" {
         ip_cidr_range = each.value.secondary_ranges_services_ips
       },
   ] }
-    depends_on                  = [time_sleep.wait_120_seconds]
+    # depends_on                  = [time_sleep.wait_120_seconds]
 }
