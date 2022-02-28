@@ -8,7 +8,7 @@
 
 ## Steps to deploy the platform:
 
-Components and features : Google Kubernetes Engine, Anthos Config Management, Anthos Config Connector, 
+Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, Custom VPCs, Anthos Config Management, Anthos Config Connector, Multi-cluster services, Anthos Service Mesh and a custom Cloud build deployment pipeline.
 
 1. Clone this repo
 1. Set variables that will be used in multiple commands:

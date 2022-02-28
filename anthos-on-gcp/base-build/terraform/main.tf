@@ -3,7 +3,7 @@ resource "google_gke_hub_membership" "membership" {
    for_each     = var.regions
   
   membership_id = each.value.gke_cluster_hub_membership_id
-#   cluster_name = each.value.gke_cluster_name
+  cluster_name = each.value.gke_cluster_name
   endpoint {
     gke_cluster {
       resource_link = "//container.googleapis.com/${module.gke[each.key].cluster_id}"
@@ -49,15 +49,15 @@ resource "google_gke_hub_feature_membership" "feature_member" {
 
 }
 
-# resource "google_gke_hub_feature" "multiclusterservicediscovery" {
-#   name = "multiclusterservicediscovery"
-#   location = "global"
-#   labels = {
-#     foo = "bar"
-#   }
-#   provider = google-beta
-#    depends_on = [module.enabled_google_apis.activate_apis]
-# }
+resource "google_gke_hub_feature" "multiclusterservicediscovery" {
+  name = "multiclusterservicediscovery"
+  location = "global"
+  labels = {
+    foo = "bar"
+  }
+  provider = google-beta
+   depends_on = [module.enabled_google_apis.activate_apis]
+}
 
 resource "google_gke_hub_feature" "multiclusteringress" {
   name = "multiclusteringress"
@@ -80,22 +80,6 @@ resource "google_gke_hub_feature" "multiclusteringress" {
 data "google_client_config" "gke-cluster-east" {
  
 }
-
-# provider "kubernetes"  {
-#   alias                  = "gke-cluster-east"
-#   host                   = "https://${module.gke["us-east1"].endpoint}"
-#   token                  = data.google_client_config.gke-cluster-east.access_token
-#   cluster_ca_certificate = base64decode(module.gke["us-east1"].ca_certificate)
-# }
-
-
-# provider "kubernetes"  {
-#   alias                  = "gke-cluster-east"
-#   host                   = "https://${module.gke["us-east1"].endpoint}"
-#   token                  = data.google_client_config.gke-cluster-east.access_token
-#   cluster_ca_certificate = base64decode(module.gke["us-east1"].ca_certificate)
-# }
-
 
 module "gke_auth" {
   source           = "terraform-google-modules/kubernetes-engine/google//modules/auth"
