@@ -65,6 +65,7 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
     curl http://127.0.0.1:8888/api/v1/namespaces/wp/services/wordpress/proxy/wp-admin/install.php
 
     ```
+1. To see is Anthos Config Management feature has been activate successfully.
 
 1. Finally, let's clean up. First, don't forget to foreground the proxy again to kill it. Also, apply `terraform destroy` to remove the GCP resources that were deployed to the project.
 

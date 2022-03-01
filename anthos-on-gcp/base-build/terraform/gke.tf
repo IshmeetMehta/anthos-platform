@@ -1,9 +1,26 @@
 resource "null_resource" "previous" {}
 
+# resource "time_sleep" "wait_120_seconds" {
+#   depends_on = [null_resource.previous]
+
+#   create_duration = "120s"
+# }
+
 resource "time_sleep" "wait_120_seconds" {
-  depends_on = [null_resource.previous]
+  depends_on = [null_resource.enable_mesh]
 
   create_duration = "120s"
+}
+
+# TODO: Waiting for fleet api for ASM
+resource "null_resource" "enable_mesh" {
+
+  provisioner "local-exec" {
+    when    = create
+    command = "echo y | gcloud container hub mesh enable --project ${var.project_id}"
+  }
+
+  depends_on = [null_resource.previous]
 }
 
 
@@ -25,9 +42,10 @@ module "enabled_google_apis" {
     "multiclusterservicediscovery.googleapis.com",
     "sqladmin.googleapis.com",
     "gkehub.googleapis.com",
-    "meshconfig.googleapis.com"
+    "mesh.googleapis.com",
+    "meshconfig.googleapis.com",
+    "cloudbuild.googleapis.com"
   ]
-  # depends_on = [time_sleep.wait_120_seconds]
 }
 
 module "gke" {
@@ -46,24 +64,6 @@ module "gke" {
   ip_range_pods                     = each.value.secondary_ranges_pods_name
   ip_range_services                 = each.value.secondary_ranges_services_name
   config_connector                  = true
-  # network                           = module.vpc.network_name.
-  # subnetwork                        = module.vpc.subnet_name[each.value.subnet_name]
-  # ip_range_pods                     = module.vpc.secondary_ranges_pods_name[each.value.secondary_ranges_pods_name]
-  # ip_range_services                 = module.vpc.secondary_ranges_services_name[each.value.secondary_ranges_services_name]
-  # enable_private_endpoint           = false
-  # enable_private_nodes              = false
-  # master_ipv4_cidr_block            = " "
-  # network_policy                    = true
-  # horizontal_pod_autoscaling        = true
-  # service_account                   = "create"
-  # remove_default_node_pool          = true
-  # disable_legacy_metadata_endpoints = true
-
-  # master_authorized_networks = [
-  #   {
-
-  #   },
-  # ]
 
   node_pools = [
     {
@@ -71,13 +71,6 @@ module "gke" {
       machine_type       = "n1-standard-1"
       min_count          = 1
       max_count          = 4
-      # disk_size_gb       = 100
-      # disk_type          = "pd-ssd"
-      # image_type         = "COS"
-      # auto_repair        = true
-      # auto_upgrade       = false
-      # preemptible        = false
-      # initial_node_count = 1
     },
   ]
 

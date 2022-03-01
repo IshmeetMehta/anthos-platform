@@ -3,13 +3,13 @@ resource "google_gke_hub_membership" "membership" {
    for_each     = var.regions
   
   membership_id = each.value.gke_cluster_hub_membership_id
-  cluster_name = each.value.gke_cluster_name
+  #cluster_name = each.value.gke_cluster_name
   endpoint {
     gke_cluster {
       resource_link = "//container.googleapis.com/${module.gke[each.key].cluster_id}"
     }
   }
-  depends_on = [module.gke.name, module.enabled_google_apis.activate_apis] 
+  depends_on = [module.gke.name, null_resource.enable_mesh ,module.enabled_google_apis.activate_apis] 
 }
 
 resource "google_gke_hub_feature" "feature" {
@@ -62,7 +62,6 @@ resource "google_gke_hub_feature" "multiclusterservicediscovery" {
 resource "google_gke_hub_feature" "multiclusteringress" {
   name = "multiclusteringress"
   location = "global"
-  #  for_each   = var.regions
   spec {
     multiclusteringress {
       
@@ -73,8 +72,6 @@ resource "google_gke_hub_feature" "multiclusteringress" {
   depends_on = [module.enabled_google_apis.activate_apis, google_gke_hub_feature_membership.feature_member]
 }
 
-
-
 # google_client_config and kubernetes provider must be explicitly specified like the following.
 
 data "google_client_config" "gke-cluster-east" {
@@ -82,6 +79,7 @@ data "google_client_config" "gke-cluster-east" {
 }
 
 module "gke_auth" {
+  depends_on = [module.gke.name] 
   source           = "terraform-google-modules/kubernetes-engine/google//modules/auth"
 
   project_id       = module.enabled_google_apis.project_id 
@@ -97,7 +95,7 @@ provider "kubernetes" {
 }
 
 module "asm" {
-  depends_on = [module.enabled_google_apis.activate_apis] 
+  depends_on = [module.enabled_google_apis.activate_apis, module.gke_auth.cluster_name] 
   source           = "git::https://github.com/Monkeyanator/terraform-google-kubernetes-engine.git//modules/asm?ref=rewrite-asm-module"
   cluster_name     = module.gke["us-east1"].name
   cluster_location = module.gke["us-east1"].location

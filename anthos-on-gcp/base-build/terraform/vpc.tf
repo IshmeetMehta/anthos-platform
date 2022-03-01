@@ -59,5 +59,4 @@ module "vpc" {
         ip_cidr_range = each.value.secondary_ranges_services_ips
       },
   ] }
-    # depends_on                  = [time_sleep.wait_120_seconds]
 }
