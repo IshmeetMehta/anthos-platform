@@ -57,7 +57,7 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
     # get values from cluster that was created
 
 
-    # then get creditials for it and proxy to the wordpress service to see it running
+    # then get credentials for it and proxy to the wordpress service to see it running
     gcloud container clusters get-credentials $CLUSTER_NAME --zone $CLUSTER_ZONE --project $PROJECT_ID
     kubectl proxy --port 8888 &
 
@@ -65,33 +65,184 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
     curl http://127.0.0.1:8888/api/v1/namespaces/wp/services/wordpress/proxy/wp-admin/install.php
 
     ```
+
+1. To see is GKE clusters have been successfully created.
+
+
+    ```bash   
+    gcloud container clusters list
+
+     NAME              LOCATION  MASTER_VERSION   MASTER_IP    MACHINE_TYPE  NODE_VERSION     NUM_NODES  STATUS
+     gke-cluster-east  us-east1  1.22.6-gke.1000  xx.xx.xx.xx  e2-medium     1.22.6-gke.1000  6          RECONCILING
+     gke-cluster-west  us-west1  1.22.6-gke.300   xx.xx.xx.xx  e2-medium     1.22.6-gke.300   6          RECONCILING
+
+    ```
+
 1. To see is Anthos Config Management feature has been activate successfully.
 
 
+    ```bash
+       
+    gcloud container hub memberships list
 
+    NAME                             EXTERNAL_ID
+    membership-hub-gke-cluster-east  xxxx-xxxx-xxxx-xxxx
+    membership-hub-gke-cluster-west  xxxx-xxxx-xxxx-xxxx
+
+    ```
 
 1. To see is Anthos Service Mesh feature has been activate successfully.
 
+ # First lets get the credentials for the GKE cluster 
+    gcloud container clusters get-credentials gke-cluster-east --region "us-east1" --project $PROJECT_ID
 
 
+    # Inspect the state of controlplanerevision CustomResource
+    kubectl describe controlplanerevision asm-managed -n istio-system
+    
+    The output is similar to the following:
+
+
+        Name:         asm-managed
+        Namespace:    istio-system
+        Labels:       mesh.cloud.google.com/managed-cni-enabled=true
+        Annotations:  <none>
+        API Version:  mesh.cloud.google.com/v1beta1
+        Kind:         ControlPlaneRevision
+        Metadata:
+        Creation Timestamp:  2022-02-04T19:10:56Z
+        Generation:          1
+        Managed Fields:
+            API Version:  mesh.cloud.google.com/v1beta1
+            Fields Type:  FieldsV1
+            fieldsV1:
+            f:metadata:
+                f:annotations:
+                .:
+                f:kubectl.kubernetes.io/last-applied-configuration:
+                f:labels:
+                .:
+                f:mesh.cloud.google.com/managed-cni-enabled:
+            f:spec:
+                .:
+                f:channel:
+                f:type:
+            Manager:      kubectl-client-side-apply
+            Operation:    Update
+            Time:         2022-02-04T19:10:56Z
+            API Version:  mesh.cloud.google.com/v1alpha1
+            Fields Type:  FieldsV1
+            fieldsV1:
+            f:status:
+                .:
+                f:conditions:
+            Manager:         Google-GKEHub-Controllers-Servicemesh
+            Operation:       Update
+            Time:            2022-02-04T19:12:50Z
+        Resource Version:  14573
+        UID:               2b7d5d2c-438d-4a14-9c62-625545ac80d7
+        Spec:
+        Channel:  regular
+        Type:     managed_service
+        Status:
+        Conditions:
+            Last Transition Time:  2022-02-04T19:18:04Z
+            Message:               The provisioning process has completed successfully
+            Reason:                Provisioned
+            Status:                True
+            Type:                  Reconciled
+            Last Transition Time:  2022-02-04T19:18:04Z
+            Message:               Provisioning has finished
+            Reason:                ProvisioningFinished
+            Status:                True
+            Type:                  ProvisioningFinished
+            Last Transition Time:  2022-02-04T19:18:04Z
+            Message:               Provisioning has not stalled
+            Reason:                NotStalled
+            Status:                False
+            Type:                  Stalled
+        Events:                    <none>
+
+    
+    # Review the status of the controlplanerevision custom resource named asm-managed, the RECONCILED field should be set to True.
+    kubectl get controlplanerevisions -n istio-system
+
+    The output is similar to the following:
+
+
+            NAME          RECONCILED   STALLED   AGE
+            asm-managed   True         False     14m
+
+    # Review the configmaps in the istio-system namespace.
+
+    kubectl get configmaps -n istio-system
+
+    The output is similar to the following:
+
+
+        NAME                   DATA   AGE
+        asm-options            1      20m
+        env-asm-managed        3      8m2s
+        istio-asm-managed      1      20m
+        istio-gateway-leader   0      8m1s
+        istio-leader           0      8m1s
+        kube-root-ca.crt       1      20m
+        mdp-eviction-leader    0      12m
+
+    ```
 
 1. To see is Config connector has been activate successfully.
 
 
+```bash
+
+kubectl wait -n cnrm-system --for=condition=Ready pod --all
+pod/cnrm-deletiondefender-0 condition met
+pod/cnrm-resource-stats-recorder-85c5876968-kmvdn condition met
+pod/cnrm-webhook-manager-d48686cb-5k8x4 condition met
+pod/cnrm-webhook-manager-d48686cb-hpthv condition met
+
+```
 
 
 1. To see is Policy Controller has been activate successfully.
 
+```bash
 
+gcloud beta container hub config-management status --project $PROJECT_ID
 
+#You should see output similar to the following example:
+Name                             Status  Last_Synced_Token  Sync_Branch  Last_Synced_Time      Policy_Controller 
+membership-hub-gke-cluster-east  SYNCED  xxxxxxxxx          master       2022-03-01T02:47:16Z  INSTALLED          
+membership-hub-gke-cluster-west  SYNCED  xxxxxxxx           master       2022-03-01T02:47:10Z  INSTALLED        
 
+```
 
 1. To see is Cloud  Build trigger has been created successfully.
+
+```bash
+
+gcloud beta builds triggers list
+---
+createTime: '2022-03-01T02:24:20.772661279Z'
+filename: cloudbuild.yaml
+id: xxxx-xxx-xxx-xxx-xxxx
+name: trigger
+serviceAccount: projects/xxx-xx-xx/serviceAccounts/xx-xxx-account@xxx-xx-xx.iam.gserviceaccount.com
+triggerTemplate:
+  branchName: master
+  projectId: xxx-xxx-xx
+  repoName: https://github.com/IshmeetMehta/container-app
+
+```
 
 1. Finally, let's clean up. First, don't forget to foreground the proxy again to kill it. Also, apply `terraform destroy` to remove the GCP resources that were deployed to the project.
 
    ```bash
     fg # ctrl-c
+
+    # Disable the mesh api 
+    gcloud container hub mesh disable --project=$PROJECT_ID
 
     terraform destroy -var=project=$PROJECT_ID
     ```
