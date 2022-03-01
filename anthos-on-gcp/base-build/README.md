@@ -93,9 +93,9 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
 
 1. To see is Anthos Service Mesh feature has been activate successfully.
 
-```bash
+    ```bash
 
- # First lets get the credentials for the GKE cluster 
+    # First lets get the credentials for the GKE cluster 
     gcloud container clusters get-credentials gke-cluster-east --region "us-east1" --project $PROJECT_ID
 
 
@@ -190,62 +190,63 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
         istio-leader           0      8m1s
         kube-root-ca.crt       1      20m
         mdp-eviction-leader    0      12m
-```
+        ```
 
 1. To see is Config connector has been activate successfully.
 
- ```bash
+    ```bash
 
-kubectl wait -n cnrm-system --for=condition=Ready pod --all
+    kubectl wait -n cnrm-system --for=condition=Ready pod --all
 
-#You should see output similar to the following example:
+    #You should see output similar to the following example:
 
-pod/cnrm-deletiondefender-0 condition met
-pod/cnrm-resource-stats-recorder-85c5876968-kmvdn condition met
-pod/cnrm-webhook-manager-d48686cb-5k8x4 condition met
-pod/cnrm-webhook-manager-d48686cb-hpthv condition met
+    pod/cnrm-deletiondefender-0 condition met
+    pod/cnrm-resource-stats-recorder-85c5876968-kmvdn condition met
+    pod/cnrm-webhook-manager-d48686cb-5k8x4 condition met
+    pod/cnrm-webhook-manager-d48686cb-hpthv condition met
 
-```
+    ```
 
 1. To see is Policy Controller has been activate successfully.
 
-```bash
+    ```bash
 
-gcloud beta container hub config-management status --project $PROJECT_ID
+       gcloud beta container hub config-management status --project $PROJECT_ID
 
-#You should see output similar to the following example:
+    #You should see output similar to the following example:
 Name                             Status  Last_Synced_Token  Sync_Branch  Last_Synced_Time      Policy_Controller 
 membership-hub-gke-cluster-east  SYNCED  xxxxxxxxx          master       2022-03-01T02:47:16Z  INSTALLED          
 membership-hub-gke-cluster-west  SYNCED  xxxxxxxx           master       2022-03-01T02:47:10Z  INSTALLED        
 
-```
+    
+    ```
 
 1. To see is Cloud  Build trigger has been created successfully.
 
-```bash
+    ```bash
 
-gcloud beta builds triggers list
+    gcloud beta builds triggers list
 
----
-createTime: '2022-03-01T02:24:20.772661279Z'
-filename: cloudbuild.yaml
-id: xxxx-xxx-xxx-xxx-xxxx
-name: trigger
-serviceAccount: projects/xxx-xx-xx/serviceAccounts/xx-xxx-account@xxx-xx-xx.iam.gserviceaccount.com
-triggerTemplate:
-  branchName: master
-  projectId: xxx-xxx-xx
-  repoName: https://github.com/IshmeetMehta/container-app
+    ---
+    createTime: '2022-03-01T02:24:20.772661279Z'
+    filename: cloudbuild.yaml
+    id: xxxx-xxx-xxx-xxx-xxxx
+    name: trigger
+    serviceAccount: projects/xxx-xx-xx/serviceAccounts/xx-xxx-account@xxx-xx-xx.iam.gserviceaccount.com
+    triggerTemplate:
+        branchName: master
+        projectId: xxx-xxx-xx
+        repoName: https://github.com/IshmeetMehta/container-app
 
-```
+    ```
 
 1. Finally, let's clean up. First, don't forget to foreground the proxy again to kill it. Also, apply `terraform destroy` to remove the GCP resources that were deployed to the project.
 
-   ```bash
-    fg # ctrl-c
+    ```bash
+       fg # ctrl-c
 
-    # Disable the mesh api 
-    gcloud container hub mesh disable --project=$PROJECT_ID
+        # Disable the mesh api 
+        gcloud container hub mesh disable --project=$PROJECT_ID
 
-    terraform destroy -var=project=$PROJECT_ID
+        terraform destroy -var=project=$PROJECT_ID
     ```
