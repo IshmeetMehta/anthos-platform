@@ -220,6 +220,33 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
     membership-hub-gke-cluster-west  SYNCED  xxxx            master       2022-03-01T02:47:10Z  INSTALLED         
     
     ```
+1. To see if Multi Cluster services has been activate successfully.
+
+    ```bash
+
+    gcloud beta container hub ingress describe
+    createTime: '2022-03-01T02:32:52.145134133Z'
+    membershipStates:
+    projects/xxxxxxx/locations/global/memberships/membership-hub-gke-cluster-east:
+        state:
+        code: OK
+        updateTime: '2022-03-01T03:15:49.068464446Z'
+    projects/xxxxxxx/locations/global/memberships/membership-hub-gke-cluster-west:
+        state:
+        code: OK
+        updateTime: '2022-03-01T03:15:49.068465466Z'
+    name: projects/xxxx/locations/global/features/multiclusteringress
+    resourceState:
+    state: ACTIVE
+    spec:
+    multiclusteringress:
+        configMembership: projects/xxxx/locations/global/memberships/membership-hub-gke-cluster-east
+    state:
+        state:
+            code: OK
+            description: Ready to use
+        updateTime: '2022-03-01T02:33:38.396371390Z'
+        updateTime: '2022-03-01T03:15:49.421365993Z'
 
 1. To see is Cloud  Build trigger has been created successfully.
 
