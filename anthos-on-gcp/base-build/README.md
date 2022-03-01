@@ -214,10 +214,10 @@ Components and features : Activate Google Cloud APIs, Google Kubernetes Engine, 
        gcloud beta container hub config-management status --project $PROJECT_ID
 
     #You should see output similar to the following example:
-Name                             Status  Last_Synced_Token  Sync_Branch  Last_Synced_Time      Policy_Controller 
-membership-hub-gke-cluster-east  SYNCED  xxxxxxxxx          master       2022-03-01T02:47:16Z  INSTALLED          
-membership-hub-gke-cluster-west  SYNCED  xxxxxxxx           master       2022-03-01T02:47:10Z  INSTALLED        
 
+    Name                             Status  Last_Synced_Token  Sync_Branch  Last_Synced_Time      Policy_Controller  
+    membership-hub-gke-cluster-east  SYNCED  xxxx            master       2022-03-01T02:47:16Z  INSTALLED          
+    membership-hub-gke-cluster-west  SYNCED  xxxx            master       2022-03-01T02:47:10Z  INSTALLED         
     
     ```
 
